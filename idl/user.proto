@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option go_package = "./idl/gen/user";
+
+message BaseResp {
+    int64 errNo = 1;
+    string errMsg = 2;
+}
+
+enum Gender {
+    GENDER_MALE = 0;
+    GENDER_FEMALE = 1;
+    GENDER_UNDEFINED = 999;
+}
+
+message User {
+    string id = 1;
+    string name = 2;
+    string password = 3;
+    Gender gender = 4;
+}
+
+message LoginReq {
+    string username = 1;
+    string password = 2;
+}
+message LoginResp {
+    BaseResp base_resp = 1;
+    string access_token = 2;
+    string refresh_token = 3;
+}
+
+message RegisterReq {
+    User user = 1;
+}
+message RegisterResp {
+    BaseResp base_resp = 1;
+}
+
+message QueryReq {
+    string access_token = 1;
+    string refresh_token = 2;
+}
+message QueryResp {
+    BaseResp base_resp = 1;
+    User user = 2;
+    string access_token = 3; // only if refresh_token in QueryReq is set
+}
+
+service UserService {
+    rpc Login(LoginReq) returns (LoginResp) {}
+    rpc Register(RegisterReq) returns (RegisterResp) {}
+    rpc Query(QueryReq) returns (QueryResp) {}
+}
