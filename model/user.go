@@ -14,8 +14,11 @@ type UserDao struct {
 }
 
 type UserWithID struct {
-	User
-	ID string `bson:"_id"`
+	Gender           string `bson:"gender"`
+	LastRefreshToken string `bson:"last_refresh_token"`
+	Password         string `bson:"password"`
+	Username         string `bson:"user_name"`
+	ID               string `bson:"_id"`
 }
 
 type User struct {
@@ -76,7 +79,7 @@ func (*UserDao) UpdateRefreshToken(ctx context.Context, userID, refreshToken str
 	if err != nil {
 		return 0, err
 	}
-	ur, err := GetClient().Collection(CollectionUser).UpdateOne(ctx, bson.D{{"user_id", userObjectID}},
+	ur, err := GetClient().Collection(CollectionUser).UpdateOne(ctx, bson.D{{"_id", userObjectID}},
 		bson.D{{"$set", bson.D{{"last_refresh_token", refreshToken}}}})
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {

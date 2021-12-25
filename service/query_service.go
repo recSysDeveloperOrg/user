@@ -58,12 +58,8 @@ func (s *QueryService) Query(ctx *QueryContext) {
 }
 
 func (*QueryService) checkParams(ctx *QueryContext) {
-	if strings.TrimSpace(ctx.Req.AccessToken) == "" {
-		ctx.ErrCode = BuildErrCode("empty access token", RetParamsErr)
-		return
-	}
-	if strings.TrimSpace(ctx.Req.RefreshToken) == "" {
-		ctx.ErrCode = BuildErrCode("empty refresh token", RetParamsErr)
+	if strings.TrimSpace(ctx.Req.AccessToken) == "" && strings.TrimSpace(ctx.Req.RefreshToken) == "" {
+		ctx.ErrCode = BuildErrCode("empty access&refresh token", RetParamsErr)
 	}
 }
 
@@ -77,7 +73,7 @@ func (s *QueryService) query(ctx *QueryContext) {
 
 func (s *QueryService) queryByAccessToken(ctx *QueryContext) {
 	var userWithID *model.UserWithID
-	if userWithID = s.tokenString2UserWithID(ctx, ctx.Req.RefreshToken); ctx.ErrCode != nil {
+	if userWithID = s.tokenString2UserWithID(ctx, ctx.Req.AccessToken); ctx.ErrCode != nil {
 		return
 	}
 	ctx.User = userWithID
@@ -126,9 +122,12 @@ func (*QueryService) buildResponse(ctx *QueryContext) {
 	if ctx.ErrCode != nil {
 		errCode = ctx.ErrCode
 	}
-
 	ctx.Resp.BaseResp.ErrNo, ctx.Resp.BaseResp.ErrMsg = errCode.Code, errCode.Msg
 	ctx.Resp.AccessToken = ctx.AccessToken
+
+	if ctx.User == nil {
+		return
+	}
 	gender := user.Gender_GENDER_UNDEFINED
 	if g, ok := genderString2Gender[ctx.User.Gender]; ok {
 		gender = g
